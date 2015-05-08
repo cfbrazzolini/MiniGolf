@@ -3,6 +3,9 @@
 
 #include "Object.h"
 
+
+#define SKY_BOX_SCALE 500.0
+
 point4  skybox_vertices[8] = {
 	point4(-0.5, -0.5, 0.5, 1.0),
 	point4(0.5, -0.5, 0.5, 1.0),
@@ -90,6 +93,59 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
 		glVertexAttribPointer(uniforms[3], 4, GL_FLOAT, GL_TRUE, sizeof(GLfloat) * 4, BUFFER_OFFSET(0));
 
+	}
+
+	void init(){
+		init_data();
+		init_VAO();
+		init_VBO();
+		init_shader();
+	}
+
+	// Called from draw before drawing the object
+	void start_shader()
+	{
+		glEnable(GL_TEXTURE_CUBE_MAP);
+		glActiveTexture(this_texture);
+		glBindVertexArray(vao);
+		glUseProgram(program);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		GL_CHECK_ERRORS
+	}
+
+	// Called after draw to stop drawing the object
+	void stop_shader()
+	{
+		glUseProgram(0);
+		glBindVertexArray(0);
+		GL_CHECK_ERRORS
+	}
+
+	void draw(GLfloat theta[])
+	{
+		start_shader();
+
+		// ship down the new the projection and viewing matrices
+
+		glUniformMatrix4fv(uniforms[0], 1, GL_TRUE, modelview * Scale(SKY_BOX_SCALE, SKY_BOX_SCALE, SKY_BOX_SCALE) * RotateZ(theta[2]) * RotateX(theta[0]) * RotateY(theta[1]));
+		GL_CHECK_ERRORS
+
+		glUniformMatrix4fv(uniforms[1], 1, GL_TRUE, projection);
+		GL_CHECK_ERRORS
+
+		glDrawArrays(GL_TRIANGLES, 0, vertex.size());
+		GL_CHECK_ERRORS
+
+			stop_shader();
+
+	}
+
+	void cleanup()
+	{
+		glDeleteProgram(program);
+		glDeleteTextures(1, &tex);
+		glDeleteBuffers(3, buffers);
+		glDeleteVertexArrays(1, &vao);
 	}
 
 

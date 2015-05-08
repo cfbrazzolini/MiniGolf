@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include "camera.h"
+#include "Object.h"
+#include "SkyBox.h"
 
 
 #include "Angel.h"
